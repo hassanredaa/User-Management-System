@@ -8,17 +8,24 @@ import com.login.app.loginregapi.repo.UserRepository;
 import com.login.app.loginregapi.request.AuthenticationRequest;
 import com.login.app.loginregapi.response.AuthenticationResponse;
 import com.login.app.loginregapi.utility.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
 public class LoginRegController {
 
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final UserInfoRepository userInfoRepository;
     private final UserRepository userRepository;
     private UserDetailsService userDetailsService;
@@ -26,7 +33,8 @@ public class LoginRegController {
 
 
 
-    public LoginRegController(UserInfoRepository userInfoRepository, UserRepository userRepository, UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+
+    public LoginRegController(UserInfoRepository userInfoRepository, UserRepository userRepository, UserDetailsService userDetailsService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
         this.userInfoRepository = userInfoRepository;
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
@@ -34,11 +42,14 @@ public class LoginRegController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody UserDTO userDTO){
+    public String registerUser(@Valid @RequestBody UserDTO userDTO){
         User user = new User();
         user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
+        user.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         user.setEnabled(true);
+        if(userInfoRepository.findByNid(userDTO.getNid()) == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "NID already exists");
+        }
         User saveduser = userRepository.save(user);
         UserInfo userDetails = new UserInfo();
         userDetails.setUser(saveduser);
@@ -54,12 +65,18 @@ public class LoginRegController {
     @PostMapping("/login")
     public AuthenticationResponse createToken(@RequestBody AuthenticationRequest request) {
         log.info("createToken(-)");
+
+
         // Authenticate the user
-        userDetailsService.loadUserByUsername(request.getUsername());
+        UserDetails x = userDetailsService.loadUserByUsername(request.getUsername());
+        if(bCryptPasswordEncoder.matches(request.getPassword(), x.getPassword())){
+            String jwtToken = jwtUtil.generateToken(request.getUsername());
+            return new AuthenticationResponse(jwtToken);
+        }else {
+            throw new BadCredentialsException("Invalid username or password");
+        }
 
         // Generate the token
-        String jwtToken = jwtUtil.generateToken(request.getUsername());
 
-        return new AuthenticationResponse(jwtToken);
     }
 }
