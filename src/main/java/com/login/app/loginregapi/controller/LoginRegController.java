@@ -11,8 +11,6 @@ import com.login.app.loginregapi.utility.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,13 +26,13 @@ public class LoginRegController {
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private final UserInfoRepository userInfoRepository;
     private final UserRepository userRepository;
-    private UserDetailsService userDetailsService;
-    private JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
 
 
 
 
-    public LoginRegController(UserInfoRepository userInfoRepository, UserRepository userRepository, UserDetailsService userDetailsService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
+    public LoginRegController(UserInfoRepository userInfoRepository, UserRepository userRepository, UserDetailsService userDetailsService, JwtUtil jwtUtil) {
         this.userInfoRepository = userInfoRepository;
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
@@ -42,12 +40,12 @@ public class LoginRegController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid @RequestBody UserDTO userDTO){
+    public User registerUser(@Valid @RequestBody UserDTO userDTO){
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         user.setEnabled(true);
-        if(userInfoRepository.findByNid(userDTO.getNid()) == null){
+        if(userInfoRepository.findByNid(userDTO.getNid()) != null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "NID already exists");
         }
         User saveduser = userRepository.save(user);
@@ -59,24 +57,22 @@ public class LoginRegController {
         userDetails.setDateOfBirth(userDTO.getDateOfBirth());
         userDetails.setPhoneNumber(userDTO.getPhoneNumber());
         userInfoRepository.save(userDetails);
-        return "User registered Successfully";
+        return saveduser;
     }
 
     @PostMapping("/login")
-    public AuthenticationResponse createToken(@RequestBody AuthenticationRequest request) {
-        log.info("createToken(-)");
-
-
-        // Authenticate the user
-        UserDetails x = userDetailsService.loadUserByUsername(request.getUsername());
-        if(bCryptPasswordEncoder.matches(request.getPassword(), x.getPassword())){
+    public AuthenticationResponse login(@RequestBody AuthenticationRequest request) {
+        UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
+        if(bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())){
             String jwtToken = jwtUtil.generateToken(request.getUsername());
             return new AuthenticationResponse(jwtToken);
         }else {
             throw new BadCredentialsException("Invalid username or password");
         }
+    }
 
-        // Generate the token
-
+    @GetMapping("/welcome")
+    public String getProduct(){
+        return "welcome to the spring JWT session";
     }
 }

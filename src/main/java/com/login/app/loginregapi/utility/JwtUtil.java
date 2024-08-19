@@ -20,7 +20,6 @@ public class JwtUtil {
     private long expiration;
 
     public String generateToken(String username) {
-        log.info("generateToken(-)");
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
