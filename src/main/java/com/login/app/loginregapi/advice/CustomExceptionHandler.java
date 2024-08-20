@@ -7,16 +7,19 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.security.SignatureException;
 
 @Slf4j
 @RestControllerAdvice
-public class CustomExceptionHandler {
+public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecurityException(Exception e) {
+
         return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), e.getMessage());
 
     }
+
 }

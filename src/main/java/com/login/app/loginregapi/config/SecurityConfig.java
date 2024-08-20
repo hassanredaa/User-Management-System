@@ -1,7 +1,7 @@
 package com.login.app.loginregapi.config;
 
 import com.login.app.loginregapi.filter.JwtRequestFilter;
-import com.login.app.loginregapi.service.CustomUserDetailsService;
+import com.login.app.loginregapi.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -21,17 +21,14 @@ import org.springframework.security.config.annotation.authentication.configurati
 @Slf4j
 public class SecurityConfig {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
     private final JwtRequestFilter jwtRequestFilter;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserService userService;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter, CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter, UserService userService) {
         this.jwtRequestFilter = jwtRequestFilter;
-        this.customUserDetailsService = customUserDetailsService;
+        this.userService = userService;
     }
 
     @Bean
@@ -39,14 +36,16 @@ public class SecurityConfig {
         log.info("securityFilterChain(-)");
 
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeRequests()
-                .requestMatchers("/api/register","api/login").permitAll()
-                .anyRequest().authenticated()
-                .and()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/register", "/api/login").permitAll()  // Open to everyone
+                        .requestMatchers("/api/welcome").hasRole("ADMIN")  // Requires ADMIN role
+                        .anyRequest().authenticated()  // All other requests require authentication
+                )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -55,6 +54,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return customUserDetailsService;
+        return userService;
     }
 }

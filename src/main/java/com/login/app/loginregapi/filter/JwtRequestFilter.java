@@ -1,6 +1,6 @@
 package com.login.app.loginregapi.filter;
 
-import com.login.app.loginregapi.service.CustomUserDetailsService;
+import com.login.app.loginregapi.service.UserService;
 
 import com.login.app.loginregapi.utility.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -22,12 +22,12 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserService customUserDetailsService;
 
     @Autowired
-    public JwtRequestFilter(JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService) {
+    public JwtRequestFilter(JwtUtil jwtUtil, UserService userService) {
         this.jwtUtil = jwtUtil;
-        this.customUserDetailsService = customUserDetailsService;
+        this.customUserDetailsService = userService;
     }
 
     @Override

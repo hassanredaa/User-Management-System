@@ -31,6 +31,6 @@ public class UserDTO {
 
     private LocalDate dateOfBirth;
 
-    @Pattern(regexp = "^1[0125]\\d{8}$", message = "Phone number must be in the format 01xxxxxxxxx")
     private String phoneNumber;
+    private String role;
 }
