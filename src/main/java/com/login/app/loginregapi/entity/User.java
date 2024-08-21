@@ -15,20 +15,22 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
     private String password;
     private boolean enabled;
-    @Column(nullable = false, unique = true)
-    private String nid;
-    @Column(nullable = false)
+    @Column(name = "national_id", nullable = false, unique = true)
+    private String nationalId;
+    @Column(name = "first_name", nullable = false)
     private String firstName;
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
-    @Column(nullable = false)
+    @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
+    @Column(name = "phone_number")
     private String phoneNumber;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",

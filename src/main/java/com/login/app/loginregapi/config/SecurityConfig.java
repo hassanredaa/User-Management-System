@@ -31,15 +31,17 @@ public class SecurityConfig {
         this.userService = userService;
     }
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("securityFilterChain(-)");
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/register", "/api/login").permitAll()  // Open to everyone
-                        .requestMatchers("/api/welcome").hasRole("ADMIN")  // Requires ADMIN role
-                        .anyRequest().authenticated()  // All other requests require authentication
+                        .requestMatchers("/api/register", "/api/login").permitAll()
+                        .requestMatchers("/api/welcome").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

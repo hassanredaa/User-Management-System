@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: LoginRegAPI
+  datasource:
+    url: jdbc:mysql://localhost:3306/dms
+    username: root
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  logging:
+    level:
+      org:
+        hibernate:
+          sql: debug
+
+jwt:
+  secret: mynameishassan
+  expiration: 3600000
+
+endpoints:
+  register: /api/register
+  login: /api/login
+  welcome: /api/welcome
