@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,8 +53,12 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity login(@RequestBody AuthenticationRequest request) {
         UserDetails user = loadUserByUsername(request.getUsername());
+
+
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            String jwtToken = jwtUtil.generateToken(request.getUsername());
+            User temp = userRepository.findByUsername(request.getUsername()).get();
+
+            String jwtToken = jwtUtil.generateToken(request.getUsername() , temp.getId());
             return new ResponseEntity("Logged in Successfully \n" + jwtToken, HttpStatus.OK);
         }else {
             throw new BadCredentialsException("Invalid username or password");
