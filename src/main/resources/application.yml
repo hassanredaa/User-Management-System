@@ -19,7 +19,7 @@ spring:
           sql: debug
 
 jwt:
-  secret: mynameishassan
+  secret: oWxiA4J+s34cHVbcwhYIcN5P0xq9CjYAkUz/ai3Wh8Q=
   expiration: 3600000
 
 endpoints:

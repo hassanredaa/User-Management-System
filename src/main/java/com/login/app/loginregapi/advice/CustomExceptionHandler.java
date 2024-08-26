@@ -27,5 +27,4 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         }
         return new ResponseEntity<>(validationError, HttpStatus.BAD_REQUEST );
     }
-
 }

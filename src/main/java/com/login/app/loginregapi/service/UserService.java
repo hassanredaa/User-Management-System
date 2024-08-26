@@ -7,6 +7,7 @@ import com.login.app.loginregapi.entity.UserDTO;
 import com.login.app.loginregapi.repo.RoleRepository;
 import com.login.app.loginregapi.repo.UserRepository;
 import com.login.app.loginregapi.request.AuthenticationRequest;
+import com.login.app.loginregapi.response.AuthenticationRespone;
 import com.login.app.loginregapi.utility.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,8 @@ public class UserService implements UserDetailsService {
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
             User temp = userRepository.findByUsername(request.getUsername()).get();
 
-            String jwtToken = jwtUtil.generateToken(request.getUsername() , temp.getId());
-            return new ResponseEntity("Logged in Successfully \n" + jwtToken, HttpStatus.OK);
+            AuthenticationRespone jwtToken = new AuthenticationRespone(jwtUtil.generateToken(request.getUsername() , temp.getNationalId())) ;
+            return new ResponseEntity<>(jwtToken, HttpStatus.OK);
         }else {
             throw new BadCredentialsException("Invalid username or password");
         }
