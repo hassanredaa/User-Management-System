@@ -16,13 +16,11 @@ import java.util.Set;
 @Entity
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     private String username;
     private String password;
     private boolean enabled;
     @Column(name = "national_id", nullable = false, unique = true)
+    @Id
     private String nationalId;
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -34,7 +32,7 @@ public class User {
     private String phoneNumber;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
+            joinColumns = @JoinColumn(name = "national_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 

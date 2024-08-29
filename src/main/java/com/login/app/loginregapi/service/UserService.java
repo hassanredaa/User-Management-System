@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,6 +80,8 @@ public class UserService implements UserDetailsService {
         Role role = roleRepository.findByName(userDTO.getRole()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
         user.setRoles(Set.of(role));
         userRepository.save(user);
+        new File("${storage}"+user.getNationalId()).mkdirs();
+
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 

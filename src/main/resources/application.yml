@@ -26,3 +26,5 @@ endpoints:
   register: /api/register
   login: /api/login
   welcome: /api/welcome
+
+storage: C:\Users\hassa\OneDrive\Desktop\Db\
