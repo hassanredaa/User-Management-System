@@ -11,6 +11,7 @@ import com.login.app.loginregapi.response.AuthenticationRespone;
 import com.login.app.loginregapi.utility.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,9 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.io.File;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService implements UserDetailsService {
 
+    @Value("${database.storage}")
+    private String dbPath;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     @Autowired
@@ -55,12 +57,13 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity login(@RequestBody AuthenticationRequest request) {
         UserDetails user = loadUserByUsername(request.getUsername());
-
-
+        if(Objects.equals(user.getUsername(), "")){
+            throw new BadCredentialsException("Invalid username or password");
+        }
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
             User temp = userRepository.findByUsername(request.getUsername()).get();
 
-            AuthenticationRespone jwtToken = new AuthenticationRespone(jwtUtil.generateToken(request.getUsername() , temp.getNationalId())) ;
+            AuthenticationRespone jwtToken = new AuthenticationRespone(jwtUtil.generateToken(request.getUsername() , temp.getNationalId(), temp.getFirstName(), temp.getLastName())) ;
             return new ResponseEntity<>(jwtToken, HttpStatus.OK);
         }else {
             throw new BadCredentialsException("Invalid username or password");
@@ -68,6 +71,9 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<User> save(UserDTO userDTO) {
+        if(userRepository.findByNationalId(userDTO.getNid()).isPresent()){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "National id already exists");
+        }
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -79,9 +85,8 @@ public class UserService implements UserDetailsService {
         user.setPhoneNumber(userDTO.getPhoneNumber());
         Role role = roleRepository.findByName(userDTO.getRole()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
         user.setRoles(Set.of(role));
-        userRepository.save(user);
-        new File("${storage}"+user.getNationalId()).mkdirs();
-
+        user = userRepository.save(user);
+        new File(dbPath + user.getNationalId()).mkdirs();
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 

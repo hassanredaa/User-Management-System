@@ -6,6 +6,7 @@ import com.login.app.loginregapi.request.AuthenticationRequest;
 import com.login.app.loginregapi.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +28,9 @@ public class LoginRegController {
         return userService.login(request);
     }
 
-    @GetMapping("${endpoints.welcome}")
-    public String getProduct(){
-        return "welcome to the spring JWT session";
+    @GetMapping("/hello")
+    public ResponseEntity getProduct(){
+        return new ResponseEntity<>("welcome to the spring JWT session", HttpStatus.OK);
     }
+
 }

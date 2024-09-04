@@ -10,7 +10,7 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
   logging:
     level:
@@ -27,4 +27,5 @@ endpoints:
   login: /api/login
   welcome: /api/welcome
 
-storage: C:\Users\hassa\OneDrive\Desktop\Db\
+database:
+  storage: C:\\Users\\hassa\\OneDrive\\Desktop\\Db\\
