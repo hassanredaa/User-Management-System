@@ -32,5 +32,5 @@ public class UserDTO {
     private LocalDate dateOfBirth;
 
     private String phoneNumber;
-    private String role;
+    private String role = "USER";
 }

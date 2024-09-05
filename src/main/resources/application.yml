@@ -18,6 +18,14 @@ spring:
         hibernate:
           sql: debug
 
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+        http: DEBUG
+
+
 jwt:
   secret: oWxiA4J+s34cHVbcwhYIcN5P0xq9CjYAkUz/ai3Wh8Q=
   expiration: 3600000
